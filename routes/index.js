@@ -29,14 +29,23 @@ router.get("/songs", async (req, res) => {
 router.post("/songs/delete", async (req, res) => {
   try {
     const song = req.body;
-    await myDB.deleteSong(song.$TrackId);
+    const { lastID, changes } = await myDB.deleteSong(-1);
+
+    console.log(lastID, changes);
+    if (changes === 0) {
+      req.session.err = `Couldn't delete the object ${song.$TrackId}`;
+      res.redirect("/songs");
+      return;
+    }
 
     req.session.msg = "Song deleted";
     res.redirect("/songs");
+    return;
   } catch (err) {
-    console.log("got error update");
+    console.log("got error delete");
     req.session.err = err.message;
     res.redirect("/songs");
+    return;
   }
 });
 

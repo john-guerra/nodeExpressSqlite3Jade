@@ -67,11 +67,27 @@ VALUES($Name, $Milliseconds, 1, 1);`;
     const query = `
     DELETE FROM tracks WHERE trackId==$trackId;`;
 
-    const runPromise = util.promisify(db.run.bind(db));
+    return new Promise((resolve, reject) => {
+      db.run(
+        query,
+        {
+          $trackId: songId,
+        },
+        function (err) {
+          if (err) {
+            return reject(err);
+          }
 
-    return runPromise(query, {
-      $trackId: songId,
-    }).finally(() => db.close());
+          return resolve({ lastID: this.lastID, changes: this.changes });
+        }
+      );
+    });
+
+    // const runPromise = util.promisify(db.run.bind(db));
+
+    // return runPromise(query, {
+    //   $trackId: songId,
+    // }).finally(() => db.close());
   };
 
   return myDB;
